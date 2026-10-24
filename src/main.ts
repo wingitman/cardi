@@ -43,8 +43,8 @@ function render(){
  if(!m){const welcome=document.createElement("div");welcome.className="welcome";welcome.textContent="Cards are your health. Choose a game to begin.";app.append(welcome);return}
  const active=m.game.activePlayer,actor=m.game.players[active],human=!(m.mode==="bot"&&active===1);
  const table=document.createElement("div");table.className="game-table";
- function playerArea(index:number){
-  const player=m.game.players[index];const area=document.createElement("section");area.className=`player-area ${index===active?"active-player":""}`;
+ function playerArea(index:number,current:Match){
+  const player=current.game.players[index];const area=document.createElement("section");area.className=`player-area ${index===active?"active-player":""}`;
   const title=document.createElement("div");title.className="player-title";title.textContent=`${player.id} · ${player.cards.length} cards${index===active?" · TURN":""}`;area.append(title);
   const row=document.createElement("div");row.className="card-row";
   for(const suit of suits){
@@ -52,16 +52,16 @@ function render(){
    const name=document.createElement("div");name.className="suit-name";name.textContent=`${symbols[suit]} ${suit} · ${value(player,suit)}`;column.append(name);
    const pile=document.createElement("div");pile.className="card-pile";
    for(const state of player.cards.filter(c=>c.card.suit===suit)){
-    const isOwn=index===active;const canSelect=human&&isOwn&&m.budget===null&&!canDraw(actor)&&!state.flipped;
-    const canTarget=human&&!isOwn&&m.budget!==null&&eligible(player,state.card.id)&&!m.hits.includes(state.card.id)&&rankValue(state.card.rank)<=m.budget-m.spent;
-    const card=cardButton(state,()=>{if(canSelect)beginAttack(suit);else if(canTarget)hit(state.card.id)},canSelect||canTarget,isOwn&&m.selected===suit);
+    const isOwn=index===active;const canSelect=human&&isOwn&&current.budget===null&&!canDraw(actor)&&!state.flipped;
+    const canTarget=human&&!isOwn&&current.budget!==null&&eligible(player,state.card.id)&&!current.hits.includes(state.card.id)&&rankValue(state.card.rank)<=current.budget-current.spent;
+    const card=cardButton(state,()=>{if(canSelect)beginAttack(suit);else if(canTarget)hit(state.card.id)},canSelect||canTarget,isOwn&&current.selected===suit);
     pile.append(card);
    }
    column.append(pile);row.append(column);
   }
   area.append(row);return area;
  }
- table.append(playerArea(1-active));
+ table.append(playerArea(1-active,m));
  const center=document.createElement("div");center.className="table-center";
  const status=document.createElement("div");status.className="turn-status";status.textContent=m.winner!==null?`${m.game.players[m.winner].id} wins!`:`${actor.id}'s turn`;center.append(status);
  const points=document.createElement("div");points.className="attack-points";points.textContent=m.budget===null?"Select a card to attack":`${m.budget-m.spent} / ${m.budget} attack points left`;center.append(points);
@@ -71,7 +71,7 @@ function render(){
   if(m.budget!==null)actions.append(button("Finish attack",finishAttack));
   else if(canDraw(actor))actions.append(button(m.deck.length?"Draw a card & end turn":"End turn (deck empty)",emergencyDraw));
  }
- center.append(actions);table.append(center);table.append(playerArea(active));
+ center.append(actions);table.append(center);table.append(playerArea(active,m));
  const footer=document.createElement("div");footer.className="table-footer";footer.textContent=`Draw pile: ${m.deck.length} · First hit flips · Second hit discards`;table.append(footer);app.append(table);
 }
 render();
