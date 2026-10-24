@@ -25,7 +25,7 @@ export function createGame(a:Player,b:Player):Game {
 export function availableReflexes(player:Player):number {
   return player.cards.filter(s=>s.card.suit==="diamonds"&&!s.flipped).length;
 }
-/** Attack only the topmost matching suit card; a second hit destroys an already flipped card. */
+/** Attacked cards stay flipped through the defender's next turn and the attacker's next opportunity. */
 export function attackCard(defender:Player,cardId:string):AttackResult {
   const index=defender.cards.findIndex(s=>s.card.id===cardId);
   if(index<0) throw new Error("Target card not found");
@@ -38,7 +38,7 @@ export function attackCard(defender:Player,cardId:string):AttackResult {
   const topmost=defender.cards.findLastIndex(s=>s.card.suit===state.card.suit);
   if(index!==topmost) throw new Error("Only the topmost card of a suit can be attacked");
   state.flipped=true;
-  state.recoveryTurn=defender.turn+1;
+  state.recoveryTurn=defender.turn+2;
   return "flipped";
 }
 /** Using reflex temporarily flips one available diamond. */
