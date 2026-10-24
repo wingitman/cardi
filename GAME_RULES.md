@@ -1,24 +1,20 @@
-# Cardi — working rules and implementation status
+# Cardi — agreed rules (working draft)
 
-This document records the agreed concepts and identifies decisions still needed. It is **not** a complete rules specification.
+Cardi is a two-player card attrition game. Deal four regular cards per player. **Each regular card is one health**; there is no HP pool. A player loses when all regular cards have been discarded. Flipped cards still count. Jokers are special rerolls, not health.
 
-## Agreed concepts
-- Browser game; TypeScript engine separate from the eventual UI.
-- Suits: hearts = health; spades = defence/AC; clubs = attack; diamonds = initiative/reflex.
-- Multiple cards of a suit can be held; only the topmost card in that suit is targeted by a normal card attack.
-- A successful hit on an unflipped card flips it, suspending that card's active modifier without preventing use of lower cards.
-- A successful hit on an already flipped card discards it permanently.
-- Each available diamond provides one reflex use; using a reflex flips that diamond.
-- Flipped cards recover at the end of their owner's next turn (one full turn).
-- Face-card concepts: jack = disadvantage; queen = mirror; king = advantage; ace = explode; joker = reroll.
-- Four-card initial draw was discussed.
+## Suits
+Hearts: health; spades: defence; clubs: attack; diamonds: initiative/reflex. All four suits can be used to attack. For initiative each player rolls d6 plus their diamond-stack total; highest goes first (reroll ties).
 
-## Open questions before full combat
-- Exact combat resolution and damage, health, AC, initiative, and modifier formulas.
-- Whether the topmost flipped card blocks targeting the lower cards (currently yes).
-- Exact meaning, scope and timing of advantage, mirror, disadvantage, explode and reroll.
-- Joker representation in the deck (the engine currently creates 52 standard suited cards).
-- The precise moment a flip's recovery timer begins, particularly for attacks during the defender's turn.
-- Deck, hand, draw, win conditions, and multiplayer synchronization.
+## Combat
+On your turn select any suit stack with unflipped cards. Add its unflipped card values to a d6 roll to form an attack budget. Spend that budget against one or more opponent cards; each target costs its printed value. Equal is sufficient: 12 can hit two sixes. Normally only the topmost card of each suit is targetable; an already flipped card can be hit again. First successful hit flips a card, temporarily removing its contribution; second successful hit while flipped discards it. Cards beneath flipped cards can still contribute to attacks.
 
-The engine currently implements only card state, reflex availability, topmost targeting, discard on a second hit, and a provisional end-of-turn recovery rule. No complete combat loop or browser UI yet.
+Before the attack lands, an opponent with a Joker can force a reroll of its dice. A Joker can also reroll its owner's attack. Resolve the reroll before applying any hits. Exact Joker acquisition and multiple-Joker timing are not finalised.
+
+## Recovery and draw
+Flipped cards recover at the **end of their owner's next turn**, not before. If a player starts a turn with no unflipped regular cards, they may draw exactly one regular card, place it upright in its suit stack and immediately end their turn. This option is unavailable if any regular card is unflipped. If the deck is empty, end the turn without drawing.
+
+## Face cards
+Jack: two d6 added together. Queen: mirror the opponent's matching suit-stack value. King: two d6, take the higher. Ace: exploding die. Joker: reroll attack dice, outside the health count. Exact interactions remain open. Face-card target costs provisionally: Jack 11, Queen 12, King 13, Ace 14.
+
+## Implementation status
+The browser prototype covers basic suit-stack attacks, flips/discards, recovery, attrition and emergency draws. Joker reactions, face-card powers and diamond reflexes remain unimplemented.
